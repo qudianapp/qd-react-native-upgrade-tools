@@ -17,7 +17,9 @@
   "dependencies": {
     "react-native-device-info": "^0.22.4",
     "prop-types": "^15.6.2",
-    "react-native-storage": "^0.2.2"
+    "react-native-storage": "^0.2.2",
+    "@remobile/react-native-toast": "^1.0.7",
+    "@qudian_mobile/qd-react-native-tool-kit": "^0.1.0"
   },
   "peerDependencies": {
     "react-native": "^0.55.4"

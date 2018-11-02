@@ -1,12 +1,12 @@
-import React from 'react';
 import {
     Alert,
     Linking,
-    AsyncStorage,
     Platform,
+    BackHandler,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import Storage from 'react-native-storage';
+import Toast from '@remobile/react-native-toast';
+import { DownloadHelper } from '@qudian_mobile/qd-react-native-tool-kit';
 
 const CHOICE_TYPE = {
     OK: 'ok',
@@ -14,15 +14,13 @@ const CHOICE_TYPE = {
     REMINDE_ME_LATER: 'remind_me_later',
 };
 
-const STORAGE_KEY = 'last_choice';
-
 export default class UpgradeHelper {
 
     constructor() {
 
     }
 
-    newVersion = '';
+    version = '';
     forceUpdate = false;
     url = '';
     message = '';
@@ -34,8 +32,9 @@ export default class UpgradeHelper {
     checkUpdates(requestFuncPromise) {
         requestFuncPromise().then((data) => {
             if (data.has_new) {
-                this.newVersion = data.version;
+                this.version = data.version;
                 this.forceUpdate = data.force_update;
+                this.url = data.url;
                 if (data.message) {
                     this.message = data.message;
                 }
@@ -43,25 +42,28 @@ export default class UpgradeHelper {
                 if (DeviceInfo.getVersion() !== data.version) {
                     // 检查用户是否拒绝过升级
                     storage.load({ 
-                        key: STORAGE_KEY,
+                        key: this.generateVersionChoiceKey(),
                     }).then((ret) => {
                         if (ret === CHOICE_TYPE.REMINDE_ME_LATER) {
                             this.showAlert();
                         }
-                    }).catch(() => {
-                        this.showAlert();
+                    }).catch((err) => {
+                        console.warn('store err')
+                        if (err.name === 'NotFoundError') {
+                            this.showAlert();
+                        }
                     })
                 }
             }
         }).catch(e =>{
-            console.warn('检查更新失败')
+            console.warn('检查更新失败', e)
         });
     }
 
     showAlert() {
         let options = [
             {text: '取消', onPress: () => {
-                this.forgetChoice();
+                this.rememberChoice(CHOICE_TYPE.CANCLE);
             }},
             {text: '下次提醒我', onPress: () => {
                 this.rememberChoice(CHOICE_TYPE.REMINDE_ME_LATER);
@@ -81,27 +83,48 @@ export default class UpgradeHelper {
         if (this.message !== '') {
             message = this.message;
         }
-        Alert.alert('升级', message, options , { cancelable: this.forceUpdate });
+        Alert.alert('升级', message, options , { 
+            cancelable: true, 
+            onDismiss: () => {
+                if (this.forceUpdate) {
+                    Toast.showLongCenter('必须更新才可以使用App！');
+                    setTimeout(() => {
+                        BackHandler.exitApp();
+                    }, 1000);
+                } else {
+                    this.rememberChoice(CHOICE_TYPE.CANCLE);
+                }
+            }
+        });
     }
 
     doUpgrade() {
+        if (this.url === '') {
+            return;
+        }
         if (Platform.OS === 'android') {
             // 下载
+            DownloadHelper.download(this.url);
         } else {
             // 跳转AppStore
+            Linking.openURL(this.url);
         }
     }
 
     rememberChoice(type) {
         storage.save({
-            key: STORAGE_KEY,
+            key: this.generateVersionChoiceKey(),
             data: type,
         });
     }
 
     forgetChoice(type) {
         storage.remove({
-            key: STORAGE_KEY,
+            key: this.generateVersionChoiceKey(),
         });
+    }
+
+    generateVersionChoiceKey() {
+        return `choiceForVersion${this.version}`;
     }
 }
