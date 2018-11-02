@@ -1,0 +1,23 @@
+{
+  "name": "@qudian_mobile/qd-react-native-upgrade-tools",
+  "version": "0.1.0",
+  "description": "react native helper for native upgrade",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qudianapp/qd-react-native-upgrade-tools.git"
+  },
+  "keywords": [
+    "react-native",
+    "upgrade"
+  ],
+  "author": "Phoobobo phoobobo@163.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/qudianapp/qd-react-native-upgrade-tools/issues"
+  },
+  "homepage": "https://github.com/qudianapp/qd-react-native-upgrade-tools#readme"
+}
