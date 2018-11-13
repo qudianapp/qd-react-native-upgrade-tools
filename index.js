@@ -46,11 +46,11 @@ export default class UpgradeHelper {
                         key: this.generateVersionChoiceKey(),
                     }).then((ret) => {
                         if (ret === CHOICE_TYPE.REMINDE_ME_LATER || manually) {
-                            this.showAlert();
+                            this.showAlert(manually);
                         }
                     }).catch((err) => {
                         if (err.name === 'NotFoundError') {
-                            this.showAlert();
+                            this.showAlert(manually);
                         }
                     })
                 }
@@ -60,25 +60,33 @@ export default class UpgradeHelper {
         });
     }
 
-    showAlert() {
+    showAlert(manually = false) {
+        const actionCancel = {text: '取消', onPress: () => {
+            this.rememberChoice(CHOICE_TYPE.CANCLE);
+        }};
+        const actionNextTime = {text: '下次提醒我', onPress: () => {
+            this.rememberChoice(CHOICE_TYPE.REMINDE_ME_LATER);
+        }, style: 'cancel'};
+        const actionOK = {text: '好的', onPress: () => {
+            this.doUpgrade();
+        }};
         let options = [
-            {text: '取消', onPress: () => {
-                this.rememberChoice(CHOICE_TYPE.CANCLE);
-            }},
-            {text: '下次提醒我', onPress: () => {
-                this.rememberChoice(CHOICE_TYPE.REMINDE_ME_LATER);
-            }, style: 'cancel'},
-            {text: '好的', onPress: () => {
-                this.doUpgrade();
-            }},
+            actionCancel,
+            actionNextTime,
+            actionOK,
         ];
         if (this.forceUpdate) {
             options = [
-                {text: '好的', onPress: () => {
-                    this.doUpgrade();
-                }},
+                actionOK
             ];
         }
+        if (manually) {
+            options = [
+                actionCancel,
+                actionOK,
+            ];
+        }
+        
         let message = `检测到新版本${this.version}，是否前往升级？`;
         if (this.message !== '') {
             message = this.message;
