@@ -1,6 +1,6 @@
 {
   "name": "@qudian_mobile/qd-react-native-upgrade-tools",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "react native helper for native upgrade",
   "main": "index.js",
   "scripts": {
