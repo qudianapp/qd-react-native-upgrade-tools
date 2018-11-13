@@ -29,6 +29,8 @@ _checkUpdates() {
             })
         })
     }
+}
 
+// 如果是手动检查，在调用checkUpdates方法时加第二个参数true
 
 ```

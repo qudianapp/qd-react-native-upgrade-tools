@@ -28,8 +28,9 @@ export default class UpgradeHelper {
     /**
      * 检查更新
      * @param {func} requestFuncPromise 请求是否有更新的异步方法
+     * @param {bool} manually 是否是手动检查更新
      */
-    checkUpdates(requestFuncPromise) {
+    checkUpdates(requestFuncPromise, manually = false) {
         requestFuncPromise().then((data) => {
             if (data.has_new) {
                 this.version = data.version;
@@ -44,11 +45,10 @@ export default class UpgradeHelper {
                     storage.load({ 
                         key: this.generateVersionChoiceKey(),
                     }).then((ret) => {
-                        if (ret === CHOICE_TYPE.REMINDE_ME_LATER) {
+                        if (ret === CHOICE_TYPE.REMINDE_ME_LATER || manually) {
                             this.showAlert();
                         }
                     }).catch((err) => {
-                        console.warn('store err')
                         if (err.name === 'NotFoundError') {
                             this.showAlert();
                         }
@@ -118,7 +118,7 @@ export default class UpgradeHelper {
         });
     }
 
-    forgetChoice(type) {
+    forgetChoice() {
         storage.remove({
             key: this.generateVersionChoiceKey(),
         });
